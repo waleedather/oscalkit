@@ -24,7 +24,10 @@ func SecurityControlsSubcontrolCheck(check []catalog.Catalog, ProfileFile string
 		log.Fatal(err)
 	}
 
-	profileControlsDetails := ProfileProcessing(parsedProfile)
+	ListParentControls := ParentControls(parsedProfile)
+	println(len(ListParentControls))
+
+	profileControlsDetails := ProfileProcessing(parsedProfile, ListParentControls)
 
 	if len(codeGeneratedControls) == len(profileControlsDetails) {
 		println("Perfect Count Match")

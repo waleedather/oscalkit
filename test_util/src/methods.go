@@ -87,6 +87,19 @@ func controlInProfile(controlID string, profile []string) bool {
 	return false
 }
 
+// ParentControlCheck checks if the subcontrol parent controls exists
+func ParentControlCheck(subcontrol string, parentcontrols []string) bool {
+
+	subcontrol1 := strings.Split(subcontrol, ".")
+
+	for _, value := range parentcontrols {
+		if value == subcontrol1[0] {
+			return true
+		}
+	}
+	return false
+}
+
 // DownloadCatalog writes the JSON of the provided URL into a catalog.json file
 func DownloadCatalog(url string) (string, error) {
 	save := strings.Split(url, "/")
@@ -132,8 +145,22 @@ func ProfileParsing(parsedProfile *profile.Profile) []string {
 	return SecurityControls
 }
 
+// ParentControls to get the list of all parent controls in the profile
+func ParentControls(parsedProfile *profile.Profile) []string {
+	ParentControlsList := make([]string, 0)
+
+	for i := 0; i < len(parsedProfile.Imports); i++ {
+		temp := ParseImport(parsedProfile, parsedProfile.Imports[i].Href.Path, "Parent")
+		ParentControlsList = appendslice(ParentControlsList, temp)
+	}
+
+	ParentControlsList = unique(ParentControlsList)
+
+	return ParentControlsList
+}
+
 // ProfileProcessing is used to get to the catalog referenced in the profile and parse it into a map
-func ProfileProcessing(parsedProfile *profile.Profile) map[string][]string {
+func ProfileProcessing(parsedProfile *profile.Profile, ListParentControls []string) map[string][]string {
 	SecurityControlsDetails := make(map[string][]string)
 
 	for l := 0; l < len(parsedProfile.Imports); l++ {
@@ -155,7 +182,7 @@ func ProfileProcessing(parsedProfile *profile.Profile) map[string][]string {
 		check, _ := ProfileCatalogCheck(f)
 		if check == "Catalog" {
 
-			ProfileControls := ParseImport(parsedProfile, parsedProfile.Imports[l].Href.Path)
+			ProfileControls := ParseImport(parsedProfile, parsedProfile.Imports[l].Href.Path, "all")
 			catalogPath := dirName + "/" + save[len(save)-1]
 			f, err := os.Open(catalogPath)
 			if err != nil {
@@ -175,7 +202,7 @@ func ProfileProcessing(parsedProfile *profile.Profile) map[string][]string {
 						CatalogControlsDetails[parsedCatalog.Groups[i].Controls[j].Id] = append(CatalogControlsDetails[parsedCatalog.Groups[i].Controls[j].Id], string(parsedCatalog.Groups[i].Controls[j].Title))
 					}
 					for k := 0; k < len(parsedCatalog.Groups[i].Controls[j].Subcontrols); k++ {
-						if controlInProfile(parsedCatalog.Groups[i].Controls[j].Subcontrols[k].Id, ProfileControls) {
+						if controlInProfile(parsedCatalog.Groups[i].Controls[j].Subcontrols[k].Id, ProfileControls) && ParentControlCheck(parsedCatalog.Groups[i].Controls[j].Subcontrols[k].Id, ListParentControls) {
 							CatalogControlsDetails[parsedCatalog.Groups[i].Controls[j].Subcontrols[k].Id] = append(CatalogControlsDetails[parsedCatalog.Groups[i].Controls[j].Subcontrols[k].Id], parsedCatalog.Groups[i].Controls[j].Subcontrols[k].Class)
 							CatalogControlsDetails[parsedCatalog.Groups[i].Controls[j].Subcontrols[k].Id] = append(CatalogControlsDetails[parsedCatalog.Groups[i].Controls[j].Subcontrols[k].Id], string(parsedCatalog.Groups[i].Controls[j].Subcontrols[k].Title))
 						}
@@ -204,8 +231,8 @@ func ProfileProcessing(parsedProfile *profile.Profile) map[string][]string {
 				log.Fatal(err)
 			}
 
-			save := ProfileProcessing(parsedProfile1)
-			save1 := ParseImport(parsedProfile, parsedProfile.Imports[l].Href.Path)
+			save := ProfileProcessing(parsedProfile1, ListParentControls)
+			save1 := ParseImport(parsedProfile, parsedProfile.Imports[l].Href.Path, "all")
 
 			println("Recursive count = ", len(save))
 			println("Count of profile = ", len(save1))
@@ -248,26 +275,8 @@ func CommonMap(slice1 []string, CatalogControlsDetails map[string][]string) map[
 	return Result
 }
 
-// RemoveDuplicateSlice returns the elements after removing duplicates
-func RemoveDuplicateSlice(slice1 []string, slice2 []string) []string {
-	result := make([]string, 0)
-	count := 0
-	for _, s2element := range slice2 {
-		for _, s1element := range slice1 {
-			if s2element != s1element {
-				count++
-			}
-		}
-		if count > 0 {
-			result = append(result, s2element)
-		}
-		count = 0
-	}
-	return result
-}
-
-// ParseImport method to parse the profile and return the controls and subcontrols
-func ParseImport(parsedProfile *profile.Profile, link string) []string {
+// ParseImport method to parse the profile and return the controls and subcontrols or only controls
+func ParseImport(parsedProfile *profile.Profile, link string, token string) []string {
 
 	SecurityControls := make([]string, 0)
 	for i := 0; i < len(parsedProfile.Imports); i++ {
@@ -276,13 +285,22 @@ func ParseImport(parsedProfile *profile.Profile, link string) []string {
 				if parsedProfile.Imports[i].Include.IdSelectors[j].ControlId != "" {
 					SecurityControls = append(SecurityControls, parsedProfile.Imports[i].Include.IdSelectors[j].ControlId)
 				}
-				if parsedProfile.Imports[i].Include.IdSelectors[j].SubcontrolId != "" {
+				if parsedProfile.Imports[i].Include.IdSelectors[j].SubcontrolId != "" && token != "Parent" {
 					SecurityControls = append(SecurityControls, parsedProfile.Imports[i].Include.IdSelectors[j].SubcontrolId)
 				}
 			}
 		}
 	}
 	return SecurityControls
+}
+
+func appendslice(slice []string, slice1 []string) []string {
+
+	for i := 0; i < len(slice1); i++ {
+		slice = append(slice, slice1[i])
+	}
+
+	return slice
 }
 
 // AreMapsSame compares the values of two  same length maps and returns true if both the maps have the same key value pairs
