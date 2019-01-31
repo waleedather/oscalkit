@@ -41,11 +41,17 @@ func ProtocolsMapping(check []catalog.Catalog) map[string][]string {
 	for CatalogCount := 0; CatalogCount < len(check); CatalogCount++ {
 		for GroupsCount := 0; GroupsCount < len(check[CatalogCount].Groups); GroupsCount++ {
 			for ControlsCount := 0; ControlsCount < len(check[CatalogCount].Groups[GroupsCount].Controls); ControlsCount++ {
-				SecurityControls[check[CatalogCount].Groups[GroupsCount].Controls[ControlsCount].Id] = append(SecurityControls[check[CatalogCount].Groups[GroupsCount].Controls[ControlsCount].Id], check[CatalogCount].Groups[GroupsCount].Controls[ControlsCount].Class)
-				SecurityControls[check[CatalogCount].Groups[GroupsCount].Controls[ControlsCount].Id] = append(SecurityControls[check[CatalogCount].Groups[GroupsCount].Controls[ControlsCount].Id], string(check[CatalogCount].Groups[GroupsCount].Controls[ControlsCount].Title))
+				if _, ok := SecurityControls[check[CatalogCount].Groups[GroupsCount].Controls[ControlsCount].Id]; ok {
+				} else {
+					SecurityControls[check[CatalogCount].Groups[GroupsCount].Controls[ControlsCount].Id] = append(SecurityControls[check[CatalogCount].Groups[GroupsCount].Controls[ControlsCount].Id], check[CatalogCount].Groups[GroupsCount].Controls[ControlsCount].Class)
+					SecurityControls[check[CatalogCount].Groups[GroupsCount].Controls[ControlsCount].Id] = append(SecurityControls[check[CatalogCount].Groups[GroupsCount].Controls[ControlsCount].Id], string(check[CatalogCount].Groups[GroupsCount].Controls[ControlsCount].Title))
+				}
 				for SubControlsCount := 0; SubControlsCount < len(check[CatalogCount].Groups[GroupsCount].Controls[ControlsCount].Subcontrols); SubControlsCount++ {
-					SecurityControls[check[CatalogCount].Groups[GroupsCount].Controls[ControlsCount].Subcontrols[SubControlsCount].Id] = append(SecurityControls[check[CatalogCount].Groups[GroupsCount].Controls[ControlsCount].Subcontrols[SubControlsCount].Id], check[CatalogCount].Groups[GroupsCount].Controls[ControlsCount].Subcontrols[SubControlsCount].Class)
-					SecurityControls[check[CatalogCount].Groups[GroupsCount].Controls[ControlsCount].Subcontrols[SubControlsCount].Id] = append(SecurityControls[check[CatalogCount].Groups[GroupsCount].Controls[ControlsCount].Subcontrols[SubControlsCount].Id], string(check[CatalogCount].Groups[GroupsCount].Controls[ControlsCount].Subcontrols[SubControlsCount].Title))
+					if _, ok := SecurityControls[check[CatalogCount].Groups[GroupsCount].Controls[ControlsCount].Subcontrols[SubControlsCount].Id]; ok {
+					} else {
+						SecurityControls[check[CatalogCount].Groups[GroupsCount].Controls[ControlsCount].Subcontrols[SubControlsCount].Id] = append(SecurityControls[check[CatalogCount].Groups[GroupsCount].Controls[ControlsCount].Subcontrols[SubControlsCount].Id], check[CatalogCount].Groups[GroupsCount].Controls[ControlsCount].Subcontrols[SubControlsCount].Class)
+						SecurityControls[check[CatalogCount].Groups[GroupsCount].Controls[ControlsCount].Subcontrols[SubControlsCount].Id] = append(SecurityControls[check[CatalogCount].Groups[GroupsCount].Controls[ControlsCount].Subcontrols[SubControlsCount].Id], string(check[CatalogCount].Groups[GroupsCount].Controls[ControlsCount].Subcontrols[SubControlsCount].Title))
+					}
 				}
 			}
 		}
@@ -240,7 +246,6 @@ func ProfileProcessing(parsedProfile *profile.Profile, ListParentControls []stri
 			println("Common = ", len(CommonMap(save1, save)))
 			SecurityControlsDetails = appendMaps(SecurityControlsDetails, CommonMap(save1, save))
 			println("Final Count = ", len(SecurityControlsDetails))
-			// parsedProfile and parsedProfile1 common and save in SecurityControls
 		}
 	}
 

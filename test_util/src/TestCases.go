@@ -33,8 +33,8 @@ func SecurityControlsSubcontrolCheck(check []catalog.Catalog, ProfileFile string
 		println("Perfect Count Match")
 		println("Go file control, sub-control count: ", len(codeGeneratedControls))
 		println("Profile control, sub-control count: ", len(profileControlsDetails))
-		codeGeneratedMapping := ProtocolsMapping(check)
-		mapcompareflag := AreMapsSame(profileControlsDetails, codeGeneratedMapping)
+
+		mapcompareflag := AreMapsSame(profileControlsDetails, codeGeneratedControls)
 		if mapcompareflag {
 			color.Green("ID, Class & Title Mapping Correct")
 		} else {
