@@ -138,7 +138,7 @@
 			<call control-id="si-12"/>
 		</include>
 	</import>
-	<import href="NIST_SP-800-53_rev4_catalog.xml">
+	<import href="/NIST_SP-800-53_rev4_catalog.xml">
 		<include>
 			<call subcontrol-id="ca-2.1"/>
 			<call control-id="si-16"/>

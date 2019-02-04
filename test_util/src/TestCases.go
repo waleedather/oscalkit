@@ -25,32 +25,51 @@ func SecurityControlsSubcontrolCheck(check []catalog.Catalog, ProfileFile string
 	}
 
 	ListParentControls := ParentControls(parsedProfile)
-	println(len(ListParentControls))
 
 	profileControlsDetails := ProfileProcessing(parsedProfile, ListParentControls)
 
-	if len(codeGeneratedControls) == len(profileControlsDetails) {
-		println("Perfect Count Match")
-		println("Go file control, sub-control count: ", len(codeGeneratedControls))
-		println("Profile control, sub-control count: ", len(profileControlsDetails))
-
-		mapcompareflag := AreMapsSame(profileControlsDetails, codeGeneratedControls)
-		if mapcompareflag {
-			color.Green("ID, Class & Title Mapping Correct")
-		} else {
-			color.Red("ID, Class & Title Mapping Incorrect")
-		}
-	} else if len(codeGeneratedControls) > len(profileControlsDetails) {
-		println("Controls in go file are greater in number then present in profile")
-		println("Go file control, sub-control count: ", len(codeGeneratedControls))
-		println("Profile control, sub-control count: ", len(profileControlsDetails))
-		color.Red("ID, Class & Title Mapping Incorrect")
-	} else if len(codeGeneratedControls) < len(profileControlsDetails) {
-		println("Controls in profile are greater in number then present in go file")
-		println("Go file control, sub-control count: ", len(codeGeneratedControls))
-		println("Profile control, sub-control count: ", len(profileControlsDetails))
-		color.Red("ID, Class & Title Mapping Incorrect")
+	if Count(codeGeneratedControls, "controls") == Count(profileControlsDetails, "controls") {
+		color.Green("Controls & SubControls Count Matched")
+		println("Go file control & sub-control count: ", Count(codeGeneratedControls, "controls"))
+		println("Profile control & sub-control count: ", Count(profileControlsDetails, "controls"))
+	} else if Count(codeGeneratedControls, "controls") > Count(profileControlsDetails, "controls") {
+		color.Red("Controls & Subcontrols in go file are greater in number then present in profile")
+		println("Go file control & sub-control count: ", Count(codeGeneratedControls, "controls"))
+		println("Profile control & sub-control count: ", Count(profileControlsDetails, "controls"))
+	} else if Count(codeGeneratedControls, "controls") < Count(profileControlsDetails, "controls") {
+		color.Red("Controls & Subcontrols in profile are greater in number then present in go file")
+		println("Go file control & sub-control count: ", Count(codeGeneratedControls, "controls"))
+		println("Profile control & sub-control count: ", Count(profileControlsDetails, "controls"))
 	}
+
+	controlmapcompareflag := AreMapsSame(profileControlsDetails, codeGeneratedControls, "controls")
+	if controlmapcompareflag {
+		color.Green("ID, Class & Title Mapping Of All Controls & SubControls Correct")
+	} else {
+		color.Red("ID, Class & Title Mapping Of All Controls & SubControls Incorrect")
+	}
+
+	if Count(codeGeneratedControls, "parts") == Count(profileControlsDetails, "parts") {
+		color.Green("Parts Count Matched")
+		println("Go file parts count: ", Count(codeGeneratedControls, "parts"))
+		println("Profile parts count: ", Count(profileControlsDetails, "parts"))
+	} else if Count(codeGeneratedControls, "parts") > Count(profileControlsDetails, "parts") {
+		color.Red("Parts in go file are greater in number then present in profile")
+		println("Go file parts count: ", Count(codeGeneratedControls, "parts"))
+		println("Profile parts count: ", Count(profileControlsDetails, "parts"))
+	} else if Count(codeGeneratedControls, "parts") < Count(profileControlsDetails, "parts") {
+		color.Red("Parts in profile are greater in number then present in go file")
+		println("Go file parts count: ", Count(codeGeneratedControls, "parts"))
+		println("Profile parts count: ", Count(profileControlsDetails, "parts"))
+	}
+
+	partsmapcompareflag := AreMapsSame(profileControlsDetails, codeGeneratedControls, "parts")
+	if partsmapcompareflag {
+		color.Green("ID, Class & Title Mapping Of Parts Correct")
+	} else {
+		color.Red("ID, Class & Title Mapping Of All Parts Incorrect")
+	}
+
 	file, _ := filepath.Glob("./oscaltesttmp*")
 	if file != nil {
 		for _, f := range file {
