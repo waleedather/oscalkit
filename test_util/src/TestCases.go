@@ -24,9 +24,9 @@ func SecurityControlsSubcontrolCheck(check []catalog.Catalog, ProfileFile string
 		log.Fatal(err)
 	}
 
-	ListParentControls := ParentControls(parsedProfile)
+	listParentControls := ParentControls(parsedProfile)
 
-	profileControlsDetails := ProfileProcessing(parsedProfile, ListParentControls)
+	profileControlsDetails := ProfileProcessing(parsedProfile, listParentControls)
 
 	if Count(codeGeneratedControls, "controls") == Count(profileControlsDetails, "controls") {
 		color.Green("Controls & SubControls Count Matched")
@@ -42,8 +42,8 @@ func SecurityControlsSubcontrolCheck(check []catalog.Catalog, ProfileFile string
 		println("Profile control & sub-control count: ", Count(profileControlsDetails, "controls"))
 	}
 
-	controlmapcompareflag := AreMapsSame(profileControlsDetails, codeGeneratedControls, "controls")
-	if controlmapcompareflag {
+	controlMapCompareFlag := AreMapsSame(profileControlsDetails, codeGeneratedControls, "controls")
+	if controlMapCompareFlag {
 		color.Green("ID, Class & Title Mapping Of All Controls & SubControls Correct")
 	} else {
 		color.Red("ID, Class & Title Mapping Of All Controls & SubControls Incorrect")
@@ -63,8 +63,8 @@ func SecurityControlsSubcontrolCheck(check []catalog.Catalog, ProfileFile string
 		println("Profile parts count: ", Count(profileControlsDetails, "parts"))
 	}
 
-	partsmapcompareflag := AreMapsSame(profileControlsDetails, codeGeneratedControls, "parts")
-	if partsmapcompareflag {
+	partsMapCompareFlag := AreMapsSame(profileControlsDetails, codeGeneratedControls, "parts")
+	if partsMapCompareFlag {
 		color.Green("ID, Class & Title Mapping Of Parts Correct")
 	} else {
 		color.Red("ID, Class & Title Mapping Of All Parts Incorrect")
